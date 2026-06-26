@@ -1,4 +1,4 @@
-const API = "http://localhost:3000/tasks";
+const API = "https://todo-back-cu23.onrender.com/tasks";
 
 let tarefas = [];
 
