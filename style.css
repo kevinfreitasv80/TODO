@@ -242,3 +242,94 @@ h1 {
   background: var(--danger-hover);
   transform: scale(1.05);
 }
+
+/* ================= MOBILE ================= */
+
+@media (max-width: 768px) {
+  body {
+    padding: 12px;
+    align-items: flex-start;
+  }
+
+  .container {
+    padding: 20px;
+    border-radius: 18px;
+  }
+
+  h1 {
+    font-size: 1.6rem;
+    margin-bottom: 20px;
+  }
+
+  .input-container {
+    flex-direction: column;
+  }
+
+  #taskInput,
+  #addBtn {
+    width: 100%;
+  }
+
+  #addBtn {
+    padding: 15px;
+  }
+
+  .filters {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .filter-btn {
+    flex: 1 1 120px;
+    padding: 12px;
+  }
+
+  .task-item {
+    padding: 14px;
+    gap: 10px;
+  }
+
+  .task-text {
+    overflow-wrap: anywhere;
+    word-break: break-word;
+    font-size: 15px;
+  }
+
+  .remove-btn {
+    padding: 10px 12px;
+    flex-shrink: 0;
+  }
+
+  #taskList {
+    max-height: 55vh;
+  }
+}
+
+/* ================= CELULARES PEQUENOS ================= */
+
+@media (max-width: 480px) {
+  .container {
+    padding: 16px;
+    border-radius: 16px;
+  }
+
+  h1 {
+    font-size: 1.35rem;
+  }
+
+  .filters {
+    flex-direction: column;
+  }
+
+  .filter-btn {
+    width: 100%;
+  }
+
+  .task-item {
+    align-items: flex-start;
+  }
+
+  .remove-btn {
+    align-self: center;
+  }
+}
