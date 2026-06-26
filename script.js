@@ -1,152 +1,159 @@
-// Array para armazenar as tarefas
+const API = "http://localhost:3000/tasks";
+
 let tarefas = [];
 
-// Seletores
 const taskInput = document.getElementById("taskInput");
 const addBtn = document.getElementById("addBtn");
 const taskList = document.getElementById("taskList");
 const filterBtns = document.querySelectorAll(".filter-btn");
 
-// Controle do filtro atual
 let filtroAtual = "todas";
 
-// Carregar tarefas do localStorage
-function carregarTarefas() {
-  const tarefasSalvas = localStorage.getItem("tarefas");
+async function carregarTarefas() {
 
-  if (tarefasSalvas) {
-    tarefas = JSON.parse(tarefasSalvas);
-  }
-}
+    const resposta = await fetch(API);
 
-// Salvar tarefas no localStorage
-function salvarTarefas() {
-  localStorage.setItem("tarefas", JSON.stringify(tarefas));
-}
-
-// Adicionar tarefa
-function adicionarTarefa() {
-  const texto = taskInput.value.trim();
-
-  if (texto === "") {
-    alert("Digite uma tarefa!");
-    return;
-  }
-
-  const novaTarefa = {
-    id: Date.now(),
-    texto: texto,
-    concluida: false,
-  };
-
-  tarefas.push(novaTarefa);
-  salvarTarefas();
-
-  taskInput.value = "";
-  renderizarTarefas();
-}
-
-// Renderizar tarefas
-function renderizarTarefas() {
-  taskList.innerHTML = "";
-
-  let tarefasFiltradas = tarefas;
-
-  if (filtroAtual === "ativas") {
-    tarefasFiltradas = tarefas.filter((tarefa) => !tarefa.concluida);
-  }
-
-  if (filtroAtual === "concluidas") {
-    tarefasFiltradas = tarefas.filter((tarefa) => tarefa.concluida);
-  }
-
-  tarefasFiltradas.forEach((tarefa) => {
-    const li = document.createElement("li");
-    li.classList.add("task-item");
-
-    if (tarefa.concluida) {
-      li.classList.add("concluida");
-    }
-
-    // Checkbox
-    const checkbox = document.createElement("input");
-    checkbox.type = "checkbox";
-    checkbox.checked = tarefa.concluida;
-
-    checkbox.addEventListener("click", () => {
-      toggleConcluida(tarefa.id);
-    });
-
-    // Texto
-    const span = document.createElement("span");
-    span.textContent = tarefa.texto;
-    span.classList.add("task-text");
-
-    // Botão remover
-    const removeBtn = document.createElement("button");
-    removeBtn.textContent = "X";
-    removeBtn.classList.add("remove-btn");
-
-    removeBtn.addEventListener("click", () => {
-      removerTarefa(tarefa.id);
-    });
-
-    li.appendChild(checkbox);
-    li.appendChild(span);
-    li.appendChild(removeBtn);
-
-    taskList.appendChild(li);
-  });
-}
-
-// Remover tarefa
-function removerTarefa(id) {
-  tarefas = tarefas.filter((tarefa) => tarefa.id !== id);
-  salvarTarefas();
-  renderizarTarefas();
-}
-
-// Alternar conclusão
-function toggleConcluida(id) {
-  tarefas = tarefas.map((tarefa) => {
-    if (tarefa.id === id) {
-      return {
-        ...tarefa,
-        concluida: !tarefa.concluida,
-      };
-    }
-    return tarefa;
-  });
-
-  salvarTarefas();
-  renderizarTarefas();
-}
-
-// Clique no botão adicionar
-addBtn.addEventListener("click", adicionarTarefa);
-
-// Enter para adicionar
-taskInput.addEventListener("keypress", (e) => {
-  if (e.key === "Enter") {
-    adicionarTarefa();
-  }
-});
-
-// Filtros
-filterBtns.forEach((btn) => {
-  btn.addEventListener("click", () => {
-    filtroAtual = btn.dataset.filter;
-
-    filterBtns.forEach((botao) => {
-      botao.classList.remove("active");
-    });
-
-    btn.classList.add("active");
+    tarefas = await resposta.json();
 
     renderizarTarefas();
-  });
+
+}
+
+async function adicionarTarefa(){
+
+    const texto = taskInput.value.trim();
+
+    if(!texto){
+        alert("Digite uma tarefa");
+        return;
+    }
+
+    await fetch(API,{
+        method:"POST",
+        headers:{
+            "Content-Type":"application/json"
+        },
+        body:JSON.stringify({
+            texto
+        })
+    });
+
+    taskInput.value="";
+
+    carregarTarefas();
+
+}
+
+async function removerTarefa(id){
+
+    await fetch(`${API}/${id}`,{
+        method:"DELETE"
+    });
+
+    carregarTarefas();
+
+}
+
+async function toggleConcluida(id){
+
+    const tarefa = tarefas.find(t=>t.id===id);
+
+    tarefa.concluida=!tarefa.concluida;
+
+    await fetch(`${API}/${id}`,{
+
+        method:"PUT",
+
+        headers:{
+            "Content-Type":"application/json"
+        },
+
+        body:JSON.stringify(tarefa)
+
+    });
+
+    carregarTarefas();
+
+}
+
+function renderizarTarefas(){
+
+    taskList.innerHTML="";
+
+    let lista= tarefas;
+
+    if(filtroAtual==="ativas")
+        lista = tarefas.filter(t=>!t.concluida);
+
+    if(filtroAtual==="concluidas")
+        lista = tarefas.filter(t=>t.concluida);
+
+    lista.forEach(tarefa=>{
+
+        const li=document.createElement("li");
+
+        li.className="task-item";
+
+        if(tarefa.concluida)
+            li.classList.add("concluida");
+
+        const checkbox=document.createElement("input");
+
+        checkbox.type="checkbox";
+
+        checkbox.checked=tarefa.concluida;
+
+        checkbox.onclick=()=>toggleConcluida(tarefa.id);
+
+        const span=document.createElement("span");
+
+        span.textContent=tarefa.texto;
+
+        span.className="task-text";
+
+        const btn=document.createElement("button");
+
+        btn.textContent="X";
+
+        btn.className="remove-btn";
+
+        btn.onclick=()=>removerTarefa(tarefa.id);
+
+        li.appendChild(checkbox);
+
+        li.appendChild(span);
+
+        li.appendChild(btn);
+
+        taskList.appendChild(li);
+
+    });
+
+}
+
+addBtn.onclick=adicionarTarefa;
+
+taskInput.addEventListener("keypress",(e)=>{
+
+    if(e.key==="Enter")
+        adicionarTarefa();
+
 });
 
-// Inicialização
+filterBtns.forEach(btn=>{
+
+    btn.onclick=()=>{
+
+        filtroAtual=btn.dataset.filter;
+
+        filterBtns.forEach(b=>b.classList.remove("active"));
+
+        btn.classList.add("active");
+
+        renderizarTarefas();
+
+    }
+
+});
+
 carregarTarefas();
-renderizarTarefas();
